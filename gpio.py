@@ -198,6 +198,7 @@ class DHTSensor:
     DHT_SENSOR = Adafruit_DHT.DHT22
     DHT_PIN = 12
 
-    def get_data(self) -> tuple[float, float]:
-        humidity, temperature = Adafruit_DHT.read_retry(self.DHT_SENSOR, self.DHT_PIN)
+    @classmethod
+    def get_data(cls) -> tuple[float, float]:
+        humidity, temperature = Adafruit_DHT.read_retry(cls.DHT_SENSOR, cls.DHT_PIN)
         return humidity, temperature

@@ -20,22 +20,16 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 import asyncio
-import base64
-import io
 import logging
-from threading import Condition
-import weakref
 import sys
-import concurrent.futures
 import signal
 import os
 from types import FrameType
 from typing import Optional
 
 from aiohttp import web
-import aiohttp
 
-from gpio import LEDGPIO
+from gpio import LEDGPIO, DHTSensor
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -72,6 +66,11 @@ class Server:
         return web.json_response(dict(status=200))
 
     @staticmethod
+    async def get_temperature(_request: web.Request) -> web.Response:
+        humidity, temperature = DHTSensor.get_data()
+        return web.json_response(dict(status=200, humidity=humidity, temperature=temperature))
+
+    @staticmethod
     async def hello(_request: web.Request) -> web.Response:
         return web.json_response(dict(status=200))
 
@@ -81,6 +80,7 @@ class Server:
         self.website.router.add_post('/light', self.light_control)
         self.website.router.add_post('/number', self.show_number)
         self.website.router.add_post('/breath', self.breath_control)
+        self.website.router.add_get('/temperature', self.get_temperature)
         self.website.on_shutdown.append(self.handle_web_shutdown)
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, self.bind, self.port)
