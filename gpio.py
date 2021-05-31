@@ -45,7 +45,7 @@ class StandalonePWM:
                 self.pwm.ChangeDutyCycle(dc * 10)
                 await asyncio.sleep(.2)
             await asyncio.sleep(1)
-            for dc in range(10, 0, -1):
+            for dc in range(10, -1, -1):
                 self.pwm.ChangeDutyCycle(dc * 10)
                 await asyncio.sleep(.2)
             await asyncio.sleep(1)
@@ -121,7 +121,7 @@ class LEDGPIO:
                 pwm.ChangeDutyCycle(dc * 10)
             await asyncio.sleep(.05)
         await asyncio.sleep(.05)
-        for dc in range(10, 0, -1):
+        for dc in range(10, -1, -1):
             for pwm in pwms:
                 pwm.ChangeDutyCycle(dc * 10)
             await asyncio.sleep(.05)
@@ -142,7 +142,7 @@ class LEDGPIO:
             self.stop_event.clear()
             pwms = [GPIO.PWM(pin, 50) for pin in pins]
             for pwm in pwms:
-                pwm.start()
+                pwm.start(0)
             if times is None:
                 while True:
                     if self.stop_event.is_set():

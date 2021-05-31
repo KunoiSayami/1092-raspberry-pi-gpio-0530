@@ -49,7 +49,7 @@ class Server:
 
     async def light_control(self, _request: web.Request) -> web.Response:
         await self.gpio.set_light_flash(3, custom_pins=self.gpio.pins)
-        return web.json_response(dict(status=200))
+        return web.json_response(dict(status=200))  # , headers={'Access-Control-Allow-Origin': '*'})
 
     async def breath_control(self, _request: web.Request) -> web.Response:
         await self.gpio.set_light_breath()
