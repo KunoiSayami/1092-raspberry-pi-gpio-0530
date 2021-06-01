@@ -20,6 +20,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 import asyncio
+import json
 import logging
 import sys
 import signal
@@ -48,12 +49,24 @@ class Server:
         self.runner = web.AppRunner(self.website)
         self._idled = False
 
-    async def light_control(self, _request: web.Request) -> web.Response:
-        await self.gpio.set_light_flash(3, custom_pins=self.gpio.pins)
+    async def light_control(self, request: web.Request) -> web.Response:
+        try:
+            j = await request.json()
+            await self.gpio.set_light_flash(j.get('times', 1), custom_pins=self.gpio.pins)
+        except json.JSONDecodeError:
+            return web.json_response(dict(status=400, reason='Json parse error'), status=400)
+        except ValueError:
+            return web.json_response(dict(status=400, reason='Value error'), status=400)
         return web.json_response(dict(status=200))  # , headers={'Access-Control-Allow-Origin': '*'})
 
-    async def breath_control(self, _request: web.Request) -> web.Response:
-        await self.gpio.set_light_breath()
+    async def breath_control(self, request: web.Request) -> web.Response:
+        try:
+            j = await request.json()
+            await self.gpio.set_light_breath(int(j.get('times', 1)))
+        except json.JSONDecodeError:
+            return web.json_response(dict(status=400, reason='Json parse error'), status=400)
+        except ValueError:
+            return web.json_response(dict(status=400, reason='Value error'), status=400)
         return web.json_response(dict(status=200))
 
     async def show_number(self, request: web.Request) -> web.Response:

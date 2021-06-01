@@ -100,7 +100,7 @@ class LEDGPIO:
             pins = self.pins[int(not is_odd):: 2]
         else:
             pins = custom_pins
-        await self._set_light_flash_num(times, pins)
+        await self._set_light_flash_num(int(times), pins)
 
     async def _set_light_flash_num(self, times: int, pins: Sequence[int]) -> None:
         if self.clean_required.is_set():
@@ -112,7 +112,7 @@ class LEDGPIO:
                 if self.stop_event.is_set():
                     break
                 await self._unsafe_set_light_flash(pins)
-                await asyncio.sleep(.1)
+                await asyncio.sleep(.15)
             self.event.clear()
 
     @staticmethod
@@ -149,13 +149,13 @@ class LEDGPIO:
                     if self.stop_event.is_set():
                         break
                     await self._unsafe_light_breath(pwms)
-                    await asyncio.sleep(.05)
+                    await asyncio.sleep(.1)
             else:
                 for _ in range(times):
                     if self.stop_event.is_set():
                         break
                     await self._unsafe_light_breath(pwms)
-                    await asyncio.sleep(.05)
+                    await asyncio.sleep(.1)
             for pwm in pwms:
                 pwm.stop()
             self.event.clear()
