@@ -29,6 +29,7 @@ from typing import Optional
 
 from aiohttp import web
 
+import gpio
 from gpio import LEDGPIO, DHTSensor
 
 logger = logging.getLogger()
@@ -110,7 +111,11 @@ class Server:
     async def stop(self) -> None:
         await self.site.stop()
         await self.runner.cleanup()
-        await self.gpio.close()
+        try:
+            await self.gpio.close()
+        except:
+            gpio.GPIO.close()
+            raise
 
 
 def get_argument(arg: str, default: Optional[str]) -> Optional[str]:

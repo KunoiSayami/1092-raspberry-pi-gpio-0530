@@ -86,7 +86,7 @@ class LEDGPIO:
     async def _unsafe_set_light_flash(pins: Sequence[int]) -> None:
         for pin in pins:
             GPIO.output(pin, GPIO.HIGH)
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(.2)
         for pin in pins:
             GPIO.output(pin, GPIO.LOW)
 
@@ -112,6 +112,7 @@ class LEDGPIO:
                 if self.stop_event.is_set():
                     break
                 await self._unsafe_set_light_flash(pins)
+                await asyncio.sleep(.1)
             self.event.clear()
 
     @staticmethod
