@@ -50,8 +50,11 @@ class Server:
         self._idled = False
 
     async def light_control(self, request: web.Request) -> web.Response:
+        if self.gpio.busy:
+            return web.json_response(dict(status=429), status=429)
         try:
             j = await request.json()
+            # TODO: Use standalone thread for long time request
             await self.gpio.set_light_flash(j.get('times', 1), custom_pins=self.gpio.pins)
         except json.JSONDecodeError:
             return web.json_response(dict(status=400, reason='Json parse error'), status=400)
@@ -60,6 +63,8 @@ class Server:
         return web.json_response(dict(status=200))  # , headers={'Access-Control-Allow-Origin': '*'})
 
     async def breath_control(self, request: web.Request) -> web.Response:
+        if self.gpio.busy:
+            return web.json_response(dict(status=429), status=429)
         try:
             j = await request.json()
             await self.gpio.set_light_breath(int(j.get('times', 1)))
@@ -70,6 +75,8 @@ class Server:
         return web.json_response(dict(status=200))
 
     async def show_number(self, request: web.Request) -> web.Response:
+        if self.gpio.busy:
+            return web.json_response(dict(status=429), status=429)
         req = await request.json()
         if (num := req.get('number')) is not None:
             try:

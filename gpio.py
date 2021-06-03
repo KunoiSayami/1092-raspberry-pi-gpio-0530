@@ -194,6 +194,9 @@ class LEDGPIO:
             await self.clean_number()
         GPIO.cleanup()
 
+    @property
+    def busy(self) -> bool:
+        return self.event.is_set()
 
 class DHTSensor:
     DHT_SENSOR = Adafruit_DHT.DHT22
