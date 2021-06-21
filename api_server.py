@@ -31,7 +31,10 @@ from typing import Optional
 from aiohttp import web
 
 import gpio
-from gpio import LEDGPIO, DHTSensor
+from gpio import LEDGPIO
+
+if '--no-DHT' not in sys.argv:
+    from gpio import DHTSensor
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -101,7 +104,8 @@ class Server:
         self.website.router.add_post('/light', self.light_control)
         self.website.router.add_post('/number', self.show_number)
         self.website.router.add_post('/breath', self.breath_control)
-        self.website.router.add_get('/temperature', self.get_temperature)
+        if '--no-DHT' not in sys.argv:
+            self.website.router.add_get('/temperature', self.get_temperature)
         self.website.on_shutdown.append(self.handle_web_shutdown)
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, self.bind, self.port)

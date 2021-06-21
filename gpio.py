@@ -18,17 +18,29 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+import ast
 import asyncio
 import concurrent.futures
 import logging
+import sys
+from configparser import ConfigParser
 from typing import Optional, Sequence
 
 import RPi.GPIO as GPIO
-import Adafruit_DHT
+if '--no-DHT' not in sys.argv:
+    import Adafruit_DHT
 
 
 logger = logging.getLogger('gpio.gpio')
 logger.setLevel(logging.DEBUG)
+
+
+DEFAULT_GPIO_PINS = [17, 27, 22, 5, 6, 13, 19, 26]
+config = ConfigParser()
+if len(config.read('config.ini')):
+    GPIO_PINS = ast.literal_eval(config.get('GPIO', 'pins', fallback=repr(DEFAULT_GPIO_PINS)))
+else:
+    GPIO_PINS = DEFAULT_GPIO_PINS
 
 
 class StandalonePWM:
@@ -71,7 +83,7 @@ class StandalonePWM:
 
 
 class LEDGPIO:
-    pins = [17, 27, 22, 5, 6, 13, 19, 26]
+    pins = GPIO_PINS
     lock = asyncio.Lock()
     event = asyncio.Event()
     stop_event = asyncio.Event()
@@ -198,11 +210,13 @@ class LEDGPIO:
     def busy(self) -> bool:
         return self.event.is_set()
 
-class DHTSensor:
-    DHT_SENSOR = Adafruit_DHT.DHT22
-    DHT_PIN = 12
 
-    @classmethod
-    def get_data(cls) -> tuple[float, float]:
-        humidity, temperature = Adafruit_DHT.read_retry(cls.DHT_SENSOR, cls.DHT_PIN)
-        return humidity, temperature
+if '--no-DHT' not in sys.argv:
+    class DHTSensor:
+        DHT_SENSOR = Adafruit_DHT.DHT22
+        DHT_PIN = 12
+
+        @classmethod
+        def get_data(cls) -> tuple[float, float]:
+            humidity, temperature = Adafruit_DHT.read_retry(cls.DHT_SENSOR, cls.DHT_PIN)
+            return humidity, temperature
